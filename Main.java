@@ -4,6 +4,7 @@ import java.nio.file.Paths;
 import java.util.Scanner;
 
 class Main {
+
     private static String[] lerCabecalho(BufferedReader br) {
         String linhaLida;
         String[] resp = null;
@@ -22,7 +23,8 @@ class Main {
         return resp;
     }
 
-    private static BufferedReader inicializaBuffer(BufferedReader br, Scanner sc) {
+    private static BufferedReader inicializaBuffer(Scanner sc) {
+        BufferedReader br = null;
         try {
             br = Files.newBufferedReader(Paths.get(inputArquivo(sc)));
         } catch (Exception e) {
@@ -49,10 +51,10 @@ class Main {
         return resp;
     }
 
-    public static int[] mergeSortVerticeOrigem(int[] array) {
+    private static int[] mergeSortVerticeOrigem(int[] array) {
         int n = array.length;
 
-        if (n == 2) { // lembrando que n=2 é mesmo de 1 aresta!
+        if (n == 2) { // duas posições = 1 aresta! Meu vetor é um um array de ""tuplas""
             return array;
         }
 
@@ -108,26 +110,53 @@ class Main {
         return arrayOrdenado;
     }
 
+    private static int hashVerticeArraySucessores(int n) {
+        return n + 1;
+    }
+
+    private static int reverseHashArraySucessores(int n) {
+        return n - 1;
+    }
+
+    private static int hashVertice(int n) {
+        return n - 1;
+    }
+
+    private static int[] estruturarVerticeSucessor(int[] aresta, int numVertice, int[] grauSaida) {
+        // lembrar de fazer a hash vertice dps
+        int[] resp = new int[numVertice];
+        grauSaida[hashVertice(aresta[0])]++;
+        for (int i = 2; i < aresta.length; i += 2) {
+            grauSaida[hashVertice(aresta[i])]++;
+            if (aresta[i] != aresta[i - 2]) {
+                resp[hashVertice(aresta[i - 2])] = hashVerticeArraySucessores(i - 2);
+            }
+        }
+        return resp;
+    }
+
+    private static int inputVertice(Scanner sc) {
+        System.out.printf("Vértice: ");
+        int v = hashVertice(sc.nextInt());
+        sc.nextLine();
+        return v;
+    }
+
+    private static void printGrauSaida(int v, int[] grauSaida) {
+        System.out.println("Grau Saída: " + grauSaida[v]);
+    }
+
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        BufferedReader br = null;
-        br = inicializaBuffer(br, sc);
-
+        BufferedReader br = inicializaBuffer(sc);
         String[] cabecalho = lerCabecalho(br);
-
-        for (String vertice : cabecalho) {
-            System.out.println(vertice);
-        }
         int numVertice = Integer.parseInt(cabecalho[0]);
         int numAresta = Integer.parseInt(cabecalho[1]);
         int[] aresta = montarArestasGrafo(numAresta, br);
-        for (int i = 0; i < aresta.length; i += 2) {
-            System.out.println("(" + aresta[i] + " , " + aresta[i + 1] + ")");
-        }
         aresta = mergeSortVerticeOrigem(aresta);
-        System.out.println("---------------------------------");
-        for (int i = 0; i < aresta.length; i += 2) {
-            System.out.println("(" + aresta[i] + " , " + aresta[i + 1] + ")");
-        }
+        int[] grauSaida = new int[numVertice];
+        int[] verticeSucessor = estruturarVerticeSucessor(aresta, numVertice, grauSaida);
+        int vertice = inputVertice(sc);
+        printGrauSaida(vertice, grauSaida);
     }
 }
